@@ -5,10 +5,10 @@ Azure dev container.
 ```bash
 docker login 
 
-docker build -t sscspccloudnuage/azure-dev:1.0.0 .
+docker build -t sscspccloudnuage/azure-dev:1.0.1 .
 docker build -t sscspccloudnuage/azure-dev:latest .
 
-docker push sscspccloudnuage/azure-dev:1.0.0
+docker push sscspccloudnuage/azure-dev:1.0.1
 docker push sscspccloudnuage/azure-dev:latest
 ```
 

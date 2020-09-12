@@ -38,7 +38,8 @@ RUN apt-get update \
     gnupg-agent \
     software-properties-common \
     lsb-release \
-    wget 2>&1
+    wget \
+    tmux 2>&1
 
     #
     # [Optional] For local testing instead of cloud shell
