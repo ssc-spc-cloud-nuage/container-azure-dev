@@ -4,7 +4,8 @@
 #-------------------------------------------------------------------------------------------------------------
 
 # Pick any base image, but if you select node, skip installing node. 😊
-FROM ubuntu:18.04
+FROM mcr.microsoft.com/vscode/devcontainers/base:ubuntu-18.04
+# FROM ubuntu:18.04
 
 # Avoid warnings by switching to noninteractive
 ENV DEBIAN_FRONTEND=noninteractive
@@ -20,67 +21,33 @@ ARG TFLINT_VERSION=0.19.1
 ARG USERNAME=vscode
 ARG USER_UID=1000
 ARG USER_GID=$USER_UID
+# [Option] Install Powershell 7
+ARG INSTALL_POWERSHELL="false"
+
+COPY library-scripts/*.sh /tmp/library-scripts/
 
 # Configure apt and install packages
 RUN apt-get update \
-    && apt-get -y install --no-install-recommends apt-utils dialog 2>&1 \
+    && /bin/bash /tmp/library-scripts/common-debian.sh "${INSTALL_ZSH}" "${USERNAME}" "${USER_UID}" "${USER_GID}" "${UPGRADE_PACKAGES}" \
+    && bash /tmp/library-scripts/azcli-debian.sh \
+    # Terraform, tflint
+    && bash /tmp/library-scripts/terraform-debian.sh "${TERRAFORM_VERSION}" "${TFLINT_VERSION}" \
     #
-    # install git iproute2, required tools installed
-    && apt-get install -y \
-    git \
-    openssh-client \
-    less \
-    curl \
-    procps \
-    unzip \
-    apt-transport-https \
-    ca-certificates \
-    gnupg-agent \
-    software-properties-common \
-    lsb-release \
-    wget \
-    tmux 2>&1
+    # Install graphviz
+    #
+    && apt-get install -y graphviz \
+    #
+    # Install tmux
+    #
+    && apt-get install -y tmux \
+    #
+    # Clean up
+    && apt-get autoremove -y \
+    && apt-get clean -y \
+    && rm -rf /var/lib/apt/lists/*
 
-    #
-    # [Optional] For local testing instead of cloud shell
-    # Install the Azure CLI
-RUN echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ $(lsb_release -cs) main" > /etc/apt/sources.list.d/azure-cli.list \
-    && curl -sL https://packages.microsoft.com/keys/microsoft.asc | apt-key add - 2>/dev/null \
-    && apt-get update \
-    && apt-get install -y azure-cli \
-    #
-    # Install Terraform, tflint, and graphviz
-    && mkdir -p /tmp/docker-downloads \
-    && curl -sSL -o /tmp/docker-downloads/terraform.zip https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip \
-    && unzip /tmp/docker-downloads/terraform.zip \
-    && mv terraform /usr/local/bin \
-    && curl -sSL -o /tmp/docker-downloads/tflint.zip https://github.com/wata727/tflint/releases/download/v${TFLINT_VERSION}/tflint_linux_amd64.zip \
-    && unzip /tmp/docker-downloads/tflint.zip \
-    && mv tflint /usr/local/bin \
-    && cd ~ \ 
-    && rm -rf /tmp/docker-downloads \
-    && apt-get install -y graphviz
-    #
-    # Install powershell 7
-    # Download the Microsoft repository GPG keys
-RUN wget -q https://packages.microsoft.com/config/ubuntu/18.04/packages-microsoft-prod.deb \
-    # Register the Microsoft repository GPG keys
-    && dpkg -i packages-microsoft-prod.deb \
-    # Update the list of products
-    && apt-get update \
-    # Enable the "universe" repositories
-    && add-apt-repository universe \
-    # Install PowerShell
-    && apt-get install -y powershell \
-    && rm packages-microsoft-prod.deb \
-    #
-    # Create a non-root user to use if preferred - see https://aka.ms/vscode-remote/containers/non-root-user.
-    && groupadd --gid $USER_GID $USERNAME \
-    && useradd -s /bin/bash --uid $USER_UID --gid $USER_GID -m $USERNAME \
-    # [Optional] Add sudo support for the non-root user
-    && apt-get install -y sudo \
-    && echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME\
-    && chmod 0440 /etc/sudoers.d/$USERNAME \
+    # Powershell 7
+RUN if [ "${INSTALL_POWERSHELL}" = "true" ]; then bash /tmp/library-scripts/powershell-debian.sh; fi \
     #
     # Clean up
     && apt-get autoremove -y \
@@ -88,6 +55,6 @@ RUN wget -q https://packages.microsoft.com/config/ubuntu/18.04/packages-microsof
     && rm -rf /var/lib/apt/lists/*
 
 # Switch back to dialog for any ad-hoc use of apt-get
-USER vscode
+USER $USERNAME
 WORKDIR /home/$USERNAME
 ENV DEBIAN_FRONTEND=dialog
