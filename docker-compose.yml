@@ -12,18 +12,18 @@ services:
     build: 
       context: .
       dockerfile: Dockerfile
-      args:
-        - versionTerraform
-        - versionAzureCli
-        - versionKubectl
-        - versionGit
-        - versionTflint
-        - versionJq
-        - versionDockerCompose
-        - versionAzureCafTerraform
-        - versionAzuredev
-        - versionTfsec
-        - versionTerraformDocs
+      # args:
+      #   - versionTerraform
+      #   - versionAzureCli
+      #   - versionKubectl
+      #   - versionGit
+      #   - versionTflint
+      #   - versionJq
+      #   - versionDockerCompose
+      #   - versionAzureCafTerraform
+      #   - versionAzuredev
+      #   - versionTfsec
+      #   - versionTerraformDocs
 
     #volumes:
     #  - ..:/tf

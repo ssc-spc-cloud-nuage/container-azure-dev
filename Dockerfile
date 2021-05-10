@@ -11,8 +11,8 @@ FROM mcr.microsoft.com/vscode/devcontainers/base:ubuntu-18.04
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Terraform and tflint versions
-ARG TERRAFORM_VERSION=0.12.29
-ARG TFLINT_VERSION=0.19.1
+ARG TERRAFORM_VERSION=0.12.31
+ARG TFLINT_VERSION=0.28.1
 
 # This Dockerfile adds a non-root user with sudo access. Use the "remoteUser"
 # property in devcontainer.json to use it. On Linux, the container user's GID/UIDs
@@ -35,11 +35,11 @@ RUN apt-get update \
     #
     # Install graphviz
     #
-    && apt-get install -y graphviz \
+    # && apt-get install -y graphviz \
     #
     # Install tmux
     #
-    && apt-get install -y tmux \
+    # && apt-get install -y tmux \
     #
     # Clean up
     && apt-get autoremove -y \
